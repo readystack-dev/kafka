@@ -1,0 +1,89 @@
+{
+  "apt_refresh": [
+    {
+      "min_version": "5.38.2-3.2ubuntu0.7",
+      "package": "perl-base",
+      "reason": "USN-9006-1: perl-base 5.38.2-3.2ubuntu0.6 -> 5.38.2-3.2ubuntu0.7"
+    }
+  ],
+  "build_method": "source-rebuild-java",
+  "chain_id": 1171,
+  "dep_bumps": [],
+  "expected_residuals": [],
+  "images": [
+    {
+      "digest": "sha256:589ff4cc3f71aab462e7048a47a0d10edf57fbccde3fceea2281e610bf5880b4",
+      "ref": "eclipse-temurin:25-jdk-noble",
+      "role": "builder"
+    },
+    {
+      "digest": "sha256:589ff4cc3f71aab462e7048a47a0d10edf57fbccde3fceea2281e610bf5880b4",
+      "ref": "eclipse-temurin:25-jdk-noble",
+      "role": "offline_builder"
+    },
+    {
+      "digest": "sha256:f3dd0838e69b881cc382237d5901e74ae3705b1056ad964b2e0e523b174fef99",
+      "ref": "eclipse-temurin:25-jre-noble",
+      "role": "base"
+    }
+  ],
+  "mod_replaces": [],
+  "runtime_packages": [
+    "ca-certificates",
+    "tzdata",
+    "procps"
+  ],
+  "schema": "kitforge.toolchain_lock.v1",
+  "slug": "kafka",
+  "source": {
+    "build_packages": [
+      "git",
+      "ca-certificates",
+      "curl"
+    ],
+    "build_tool": "gradle",
+    "builder_image": "eclipse-temurin:25-jdk-noble",
+    "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "commit_epoch": 1791303144,
+    "gradle_dependency_forces": [
+      {
+        "ga": "at.yawk.lz4:lz4-java",
+        "version": "1.11.4"
+      },
+      {
+        "ga": "org.xerial.snappy:snappy-java",
+        "version": "1.1.10.9"
+      }
+    ],
+    "install": {
+      "extract_to": "/opt/kafka",
+      "output_glob": "core/build/distributions/kafka_2.13-*.tgz"
+    },
+    "jdk_version": "25",
+    "offline_build_cmds": [
+      "cd /src && ./gradlew --no-daemon --offline --console=plain -PcommitId=1156b2752aaa28eafc0b4c4d387e63356793268d releaseTarGz",
+      "mkdir -p /opt/kafka && tar -xzf /src/core/build/distributions/kafka_2.13-4.4.0.tgz -C /opt/kafka --strip-components=1 && rm -rf /opt/kafka/site-docs",
+      "mkdir -p /opt/kafka/readystack-docker && cp /src/docker/resources/common-scripts/bash-config /src/docker/resources/common-scripts/configure /src/docker/resources/common-scripts/configureDefaults /src/docker/resources/common-scripts/run /src/docker/jvm/launch /opt/kafka/readystack-docker/ && sed -i '/SharedArchiveFile/d' /opt/kafka/readystack-docker/launch && ! grep -q SharedArchiveFile /opt/kafka/readystack-docker/launch"
+    ],
+    "offline_env": {
+      "GRADLE_OPTS": "-Dorg.gradle.daemon=false",
+      "GRADLE_USER_HOME": "/gradle-home"
+    },
+    "online_vendor_cmds": [
+      "cd /src && ./gradlew --no-daemon --console=plain -PcommitId=1156b2752aaa28eafc0b4c4d387e63356793268d releaseTarGz",
+      "cd /src && ./gradlew --no-daemon --offline --console=plain clean"
+    ],
+    "ref": "4.4.0-rc4",
+    "repo": "https://github.com/apache/kafka",
+    "source_date_epoch": 1795200585,
+    "source_date_epoch_basis": "release-cut",
+    "source_date_epoch_provenance": "the time release 4.4.0-CE-ubuntu24.04-r7 was cut (2026-11-20T18:49:45Z), by scripts/retarget.py --rev-bump: ReadyStack dates an image by when its release was packaged (owner 2026-11-10), recorded here once and used by every rebuild of the release; it builds upstream commit 1156b2752aaa, dated 2026-10-06T16:12:24Z (source.commit_epoch).",
+    "source_prep": [
+      "sed -i 's/^\\(\\s*\\)reproducibleFileOrder = false/\\1reproducibleFileOrder = true/; s/^\\(\\s*\\)preserveFileTimestamps = true/\\1preserveFileTimestamps = false/' build.gradle && grep -q 'reproducibleFileOrder = true' build.gradle && grep -q 'preserveFileTimestamps = false' build.gradle && ! grep -q 'preserveFileTimestamps = true' build.gradle"
+    ],
+    "vendor_dirs": [
+      "/gradle-home"
+    ]
+  },
+  "version": "4.4.0"
+}

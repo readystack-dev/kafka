@@ -1,0 +1,7 @@
+image_manifest_digest=sha256:2a692a681e03e0f6455475ec53c4acd7aae08aebe7e4725cb2fc3c6af734764f
+config_digest=sha256:214975e4d4315d0c4802492efef3b328ad29711b58def399cc8f62d4601c305f
+tag=readystack/kafka:4.4.0-CE-ubuntu24.04-r7
+probe_port=9092
+probe_path=/
+probe_timeout=180
+probe_exec=/opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 >/dev/null 2>&1

@@ -1,0 +1,38 @@
+{
+  "bases": [
+    {
+      "digest": "sha256:51ae87bbb1949c1afdff51f6a3e6c5f283d84a4bd68512c9657fdc6605026a49",
+      "layout": "bases/eclipse-temurin_25-jdk-noble_589ff4cc3f71.oci",
+      "ref": "eclipse-temurin:25-jdk-noble@sha256:589ff4cc3f71aab462e7048a47a0d10edf57fbccde3fceea2281e610bf5880b4"
+    },
+    {
+      "digest": "sha256:334f294a3edd3fc7c2a7b12ed0f4b3f43c2e9bd39de2867996b4ae6a652721bf",
+      "layout": "bases/eclipse-temurin_25-jre-noble_f3dd0838e69b.oci",
+      "ref": "eclipse-temurin:25-jre-noble@sha256:f3dd0838e69b881cc382237d5901e74ae3705b1056ad964b2e0e523b174fef99"
+    }
+  ],
+  "engine": {
+    "archive": "toolchain/buildkit.tar",
+    "image_digest": "sha256:e0e67ea9c4bb07bdef683e29f70f3b623d1eb9c82274a9ec04e6bb0511449fb0",
+    "kind": "buildkit",
+    "tag": "moby/buildkit:v0.31.2"
+  },
+  "inputs": {
+    "context": ".",
+    "dockerfile": "Dockerfile.offline.pinned",
+    "mtime_policy": "clamp",
+    "source_date_epoch": 1795200585,
+    "tree_hash": "sha256:0e4c87f32af601192bc8bcf603d59770adb48922bf9b2d3b86bfcec4850e290a"
+  },
+  "probe": {
+    "exec": "/opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 >/dev/null 2>&1",
+    "port": 9092,
+    "timeout_s": 180
+  },
+  "schema": "readystack-rebuild-bundle/v0.1",
+  "subject": {
+    "config_digest": "sha256:214975e4d4315d0c4802492efef3b328ad29711b58def399cc8f62d4601c305f",
+    "image_manifest_digest": "sha256:2a692a681e03e0f6455475ec53c4acd7aae08aebe7e4725cb2fc3c6af734764f",
+    "name": "docker.io/readystack/kafka:4.4.0-CE-ubuntu24.04-r7"
+  }
+}

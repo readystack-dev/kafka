@@ -1,0 +1,9 @@
+{
+  "schema": "kitforge.source_tree_hash.v1",
+  "slug": "kafka",
+  "repo": "https://github.com/apache/kafka",
+  "ref": "4.4.0-rc4",
+  "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "tree_listing_sha256": "b5da1e956699ffe902548159723a07726c779eccb63a74c376091efa1d0a83e7",
+  "file_count": 7521
+}

@@ -1,0 +1,67 @@
+{
+  "schema": "kitforge.build_recipe.v1",
+  "slug": "kafka",
+  "image": "readystack/kafka:4.4.0-CE-ubuntu24.04-r7",
+  "build_method": "source-rebuild-java",
+  "source": {
+    "repo": "https://github.com/apache/kafka",
+    "ref": "4.4.0-rc4",
+    "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "builder_image": "eclipse-temurin:25-jdk-noble",
+    "jdk_version": "25",
+    "build_tool": "gradle",
+    "_version_note": "Kafka 4.4.0 is released: its source and binary artifacts are in the Apache release area (downloads.apache.org/kafka/4.4.0/kafka-4.4.0-src.tgz, uploaded 2026-10-06, sha512 94E118D8...C6EACAC7, and kafka_2.13-4.4.0.tgz), which holds only voted releases. Upstream has not pushed a `4.4.0` git tag; the vote passed on 4.4.0-rc4, and the tree at tag 4.4.0-rc4 (commit 1156b275) is byte-identical to the released kafka-4.4.0-src.tgz (diff -r of the two trees, 2026-10-22: no differences; gradle.properties version=4.4.0). So this builds the released source from that tag. When upstream pushes `4.4.0` (same commit) or a later release, retarget_tag_pattern finds it.",
+    "build_packages": [
+      "git",
+      "ca-certificates",
+      "curl"
+    ],
+    "vendor_dirs": [
+      "/gradle-home"
+    ],
+    "offline_env": {
+      "GRADLE_USER_HOME": "/gradle-home",
+      "GRADLE_OPTS": "-Dorg.gradle.daemon=false"
+    },
+    "source_prep": [
+      "sed -i 's/^\\(\\s*\\)reproducibleFileOrder = false/\\1reproducibleFileOrder = true/; s/^\\(\\s*\\)preserveFileTimestamps = true/\\1preserveFileTimestamps = false/' build.gradle && grep -q 'reproducibleFileOrder = true' build.gradle && grep -q 'preserveFileTimestamps = false' build.gradle && ! grep -q 'preserveFileTimestamps = true' build.gradle"
+    ],
+    "_source_prep_note": "The ONE source change: build.gradle's `tasks.withType(AbstractArchiveTask)` block sets reproducibleFileOrder = false and preserveFileTimestamps = true, so every jar and the release tarball record file modification times (the build's wall clock) and filesystem order: two builds of the same source never give the same jars. Gradle's documented reproducible-archive settings (true / false) give fixed entry times and a sorted order. It changes no code and no class file, only the archive metadata. Disclosed in the release note.",
+    "online_vendor_cmds": [
+      "cd /src && ./gradlew --no-daemon --console=plain -PcommitId=1156b2752aaa28eafc0b4c4d387e63356793268d releaseTarGz",
+      "cd /src && ./gradlew --no-daemon --offline --console=plain clean"
+    ],
+    "offline_build_cmds": [
+      "cd /src && ./gradlew --no-daemon --offline --console=plain -PcommitId=1156b2752aaa28eafc0b4c4d387e63356793268d releaseTarGz",
+      "mkdir -p /opt/kafka && tar -xzf /src/core/build/distributions/kafka_2.13-4.4.0.tgz -C /opt/kafka --strip-components=1 && rm -rf /opt/kafka/site-docs",
+      "mkdir -p /opt/kafka/readystack-docker && cp /src/docker/resources/common-scripts/bash-config /src/docker/resources/common-scripts/configure /src/docker/resources/common-scripts/configureDefaults /src/docker/resources/common-scripts/run /src/docker/jvm/launch /opt/kafka/readystack-docker/ && sed -i '/SharedArchiveFile/d' /opt/kafka/readystack-docker/launch && ! grep -q SharedArchiveFile /opt/kafka/readystack-docker/launch"
+    ],
+    "_build_note": "The online stage runs the full build once to fill /gradle-home (Gradle 9.6.1 distribution, plugins, every dependency) and then `clean`, so the offline stage compiles everything again from source with --offline: the image's jars come from the --network=none build, not from the online one. -PcommitId gives kafka-version.properties the release commit (determineCommitId reads .git otherwise, and the vendored tree has none). site-docs (the HTML documentation tarball) is not shipped in the image; the docs are at kafka.apache.org. upstream's launch script loads class-data-sharing archives (storage.jsa, kafka.jsa) that its image build creates by running Kafka; those two lines are removed, so the JVM starts without them (slightly slower start, same behaviour).",
+    "install": {
+      "output_glob": "core/build/distributions/kafka_2.13-*.tgz",
+      "extract_to": "/opt/kafka"
+    },
+    "gradle_dependency_forces": [
+      {
+        "ga": "at.yawk.lz4:lz4-java",
+        "version": "1.11.4",
+        "_why": "Kafka 4.4.0 pins lz4-java 1.11.2 (gradle/dependencies.gradle); OSV: GHSA-mcr4-qmvw-px4g (high), GHSA-343h-94h5-c4wr and GHSA-gm45-99xc-r7wv, all fixed in 1.11.4, a patch release of the same line (metabase hit the same advisories on 1.11.1)."
+      },
+      {
+        "ga": "org.xerial.snappy:snappy-java",
+        "version": "1.1.10.9",
+        "_why": "Kafka 4.4.0 pins snappy-java 1.1.10.7 (gradle/dependencies.gradle: snappy); Scout scan of the chain 727 image: CVE-2026-93451 (off-by-one) and CVE-2026-108106 (unbounded allocation), both high, both fixed in 1.1.10.9, a patch release of the same line (Apache-2.0, as 1.1.10.7). OSV lists nothing against 1.1.10.9. The jar sits in kafka's libs/ as snappy-java-<version>.jar."
+      }
+    ],
+    "source_date_epoch": 1795200585,
+    "source_date_epoch_provenance": "the time release 4.4.0-CE-ubuntu24.04-r7 was cut (2026-11-20T18:49:45Z), by scripts/retarget.py --rev-bump: ReadyStack dates an image by when its release was packaged (owner 2026-11-10), recorded here once and used by every rebuild of the release; it builds upstream commit 1156b2752aaa, dated 2026-10-06T16:12:24Z (source.commit_epoch).",
+    "source_date_epoch_basis": "release-cut",
+    "commit_epoch": 1791303144
+  },
+  "binaries_from_source": null,
+  "runtime_packages": [
+    "ca-certificates",
+    "tzdata",
+    "procps"
+  ]
+}
